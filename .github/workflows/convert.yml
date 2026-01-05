@@ -43,14 +43,15 @@ jobs:
           name: api-documentation-md
           path: output/*.md
           if-no-files-found: error
+
+      - name: Install Pandoc
+        uses: pandoc/actions/setup@v1
       
       - name: Convert Markdown to PDF using Pandoc
-        uses: docker://pandoc/latex:latest
-        with:
-          args: >-
-            --defaults=pandoc.conf
-            --output=output/api-documentation.pdf
-            output/*.md
+        run: |
+          for file in *.md; do
+            pandoc "$file" -o "${file%.md}.pdf"
+          done
       
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v4
