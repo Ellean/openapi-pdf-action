@@ -131,7 +131,7 @@ jobs:
 
 ## 许可证 / License
 
-MIT
+[GPL v3](./LICENSE)
 
 ## 参考 / References
 
