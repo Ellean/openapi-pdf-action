@@ -6,3 +6,4 @@ table-of-contents: true
 toc-depth: 3
 number-sections: true
 highlight-style: tango
+pdf-engine: xelatex
