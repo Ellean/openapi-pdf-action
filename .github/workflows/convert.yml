@@ -1,0 +1,53 @@
+name: Convert OpenAPI to PDF
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  create:
+    tags:
+      - '*'
+
+jobs:
+  convert-to-pdf:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install widdershins
+        run: npm install -g widdershins
+      
+      - name: Convert OpenAPI to Markdown
+        run: |
+          mkdir -p output
+          for file in api/*.yaml api/*.yml api/*.json; do
+            if [ -f "$file" ]; then
+              filename=$(basename "$file")
+              name="${filename%.*}"
+              echo "Converting $file to markdown..."
+              widdershins --environment widdershins.conf "$file" -o "output/${name}.md"
+            fi
+          done
+      
+      - name: Convert Markdown to PDF using Pandoc
+        uses: docker://pandoc/latex:latest
+        with:
+          args: >-
+            --defaults=pandoc.conf
+            --output=output/api-documentation.pdf
+            output/*.md
+      
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-documentation-pdf
+          path: output/*.pdf
+          if-no-files-found: error
