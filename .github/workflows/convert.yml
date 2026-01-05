@@ -49,8 +49,8 @@ jobs:
       
       - name: Convert Markdown to PDF using Pandoc
         run: |
-          for file in *.md; do
-            pandoc "$file" -o "${file%.md}.pdf"
+          for file in output/*.md; do
+            pandoc "$file" -o "${file%}.pdf"
           done
       
       - name: Upload PDF artifact
