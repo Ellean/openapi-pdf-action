@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - master
-  create:
     tags:
       - '*'
 
@@ -43,14 +42,12 @@ jobs:
           name: api-documentation-md
           path: output/*.md
           if-no-files-found: error
-
-      - name: Install Pandoc
-        uses: pandoc/actions/setup@v1
       
       - name: Convert Markdown to PDF using Pandoc
         run: |
-          for file in output/*.md; do
-            pandoc "$file" -o "${file%}.pdf"
+          for md in output/*.md; do
+            docker run --rm -v "${PWD}:/data" pandoc/core:3.8 \
+              "$md" -o "/data/output/${md}.pdf" -d pandoc.yaml
           done
       
       - name: Upload PDF artifact
