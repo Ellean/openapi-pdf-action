@@ -36,6 +36,13 @@ jobs:
               widdershins --environment widdershins.conf "$file" -o "output/${name}.md"
             fi
           done
+
+      - name: Upload Markdown artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-documentation-md
+          path: output/*.md
+          if-no-files-found: error
       
       - name: Convert Markdown to PDF using Pandoc
         uses: docker://pandoc/latex:latest
