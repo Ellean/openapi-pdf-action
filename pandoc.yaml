@@ -1,9 +1,0 @@
-pdf-engine: xelatex
-variables:
-  geometry: margin=1in
-  documentclass: article
-  fontsize: 11pt
-table-of-contents: true
-toc-depth: 3
-number-sections: true
-highlight-style: tango

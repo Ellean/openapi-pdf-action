@@ -47,7 +47,7 @@ jobs:
         uses: docker://pandoc/core:3.8
         with:
           args: >-  # allows you to break string into multiple lines
-            -d pandoc.yaml
+            --defaults pandoc.yaml
             --standalone
             --output=output/example.pdf
             output/example.md
