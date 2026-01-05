@@ -1,0 +1,74 @@
+name: 'OpenAPI to PDF Converter'
+description: 'Convert OpenAPI specifications to PDF documentation using widdershins and pandoc'
+author: 'Ellean'
+
+branding:
+  icon: 'file-text'
+  color: 'blue'
+
+inputs:
+  api-dir:
+    description: 'Directory containing OpenAPI specification files'
+    required: false
+    default: 'api'
+  widdershins-config:
+    description: 'Path to widdershins configuration file'
+    required: false
+    default: 'widdershins.conf'
+  pandoc-config:
+    description: 'Path to pandoc configuration file'
+    required: false
+    default: 'pandoc.conf'
+  output-file:
+    description: 'Output PDF file name'
+    required: false
+    default: 'api-documentation.pdf'
+
+outputs:
+  pdf-path:
+    description: 'Path to the generated PDF file'
+    value: ${{ steps.convert.outputs.pdf-path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+      shell: bash
+    
+    - name: Install widdershins
+      run: npm install -g widdershins
+      shell: bash
+    
+    - name: Convert OpenAPI to Markdown
+      id: convert-md
+      run: |
+        mkdir -p output
+        for file in ${{ inputs.api-dir }}/*.yaml ${{ inputs.api-dir }}/*.yml ${{ inputs.api-dir }}/*.json; do
+          if [ -f "$file" ]; then
+            filename=$(basename "$file")
+            name="${filename%.*}"
+            echo "Converting $file to markdown..."
+            if [ -f "${{ inputs.widdershins-config }}" ]; then
+              widdershins --environment "${{ inputs.widdershins-config }}" "$file" -o "output/${name}.md"
+            else
+              widdershins "$file" -o "output/${name}.md"
+            fi
+          fi
+        done
+      shell: bash
+    
+    - name: Convert Markdown to PDF using Pandoc
+      uses: docker://pandoc/latex:latest
+      with:
+        args: >-
+          --defaults=${{ inputs.pandoc-config }}
+          --output=output/${{ inputs.output-file }}
+          output/*.md
+    
+    - name: Set output path
+      id: convert
+      run: echo "pdf-path=output/${{ inputs.output-file }}" >> $GITHUB_OUTPUT
+      shell: bash
